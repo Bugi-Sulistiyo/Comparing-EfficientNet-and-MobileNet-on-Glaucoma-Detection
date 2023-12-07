@@ -1,8 +1,12 @@
+# augmentation using clahe
 tf_clahe=0.1.0
 
+# modeling and augmentation
 tensorflow==2.10.1
 
+# cross-validation
 scikit-learn==1.3.2
 
+# visualization
 matplotlib==3.8.2
 streamlit==1.13.0
