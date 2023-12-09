@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 sys.path.append(os.environ.get('PATH_CUSTOM_MODULES'))
 
+import random
 
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -17,7 +18,7 @@ PATH_DATA = os.environ.get('PATH_DATA_DASHBOARD')
 PATH_AUTHOR_DATA = os.path.join(PATH_DATA, 'author_info.csv')
 PATH_DATASET_DATA = os.path.join(PATH_DATA, 'dataset_info.csv')
 PATH_ARSITEKTUR_DATA = os.path.join(PATH_DATA, 'arsitektur_info.csv')
-PATH_DATASET = os.environ.get('PATH_DATASET')
+PATH_DATASET = os.environ.get('PATH_DATASET_COMBINED')
 PATH_RIMONE = os.path.join(PATH_DATASET, 'rimone')
 PATH_G1020 = os.path.join(PATH_DATASET, 'g1020')
 PATH_REFUGE = os.path.join(PATH_DATASET, 'refuge')
@@ -25,7 +26,7 @@ PATH_PAPILA = os.path.join(PATH_DATASET, 'papila')
 ## others
 LOREM_IPSUM100 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae lobortis arcu. Quisque pulvinar venenatis libero, vitae semper metus euismod pulvinar. Nam justo ligula, laoreet ut malesuada et, egestas eu quam. Quisque pharetra bibendum ultricies. Etiam condimentum risus enim. Mauris semper, mauris sed aliquet blandit, purus tellus porta velit, vitae auctor magna magna sed neque. Nunc vestibulum tincidunt ligula, ut scelerisque mi molestie non. Aenean nec maximus arcu. Integer gravida tellus sit amet rhoncus consequat. Integer scelerisque placerat felis at dignissim. Sed eget auctor sem, rhoncus condimentum odio. Nullam sem dolor, mollis id ultrices sit amet, sollicitudin nec nulla. Vivamus."
 THESIS_TITLE = "Perbandingan Arsitektur MobileNet dan EfficientNet pada Klasifikasi Glaukoma Berdasarkan Citra Fundus"
-LABELS_USADE = ["Normal", "Glaukoma"]
+LABELS_USED = ["Normal", "Glaukoma"]
 
 # dasboard section
 ## summary and title
@@ -49,12 +50,86 @@ with st.container():
                                                              "G1020",
                                                              "REFUGE",
                                                              "PAPILA"])
-    dataset_info_df = dh.load_dataframe(PATH_DATASET_DATA)
 
     ### rimone dataset
     with tab_rimone:
         st.subheader("Contoh Gambar", anchor="rimone-dataset")
-        st.image(dh.get_image_path(PATH_RIMONE))
+
+        col_normal_image, col_glaucoma_image = st.columns(2)
+        with col_normal_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_RIMONE,
+                                                            LABELS_USED[0]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[0],
+                    use_column_width=True)
+        with col_glaucoma_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_RIMONE,
+                                                            LABELS_USED[1]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[1],
+                    use_column_width=True)
+    
+    ### g1020 dataset
+    with tab_g1020:
+        st.subheader("Contoh Gambar", anchor="g1020-dataset")
+
+        col_normal_image, col_glaucoma_image = st.columns(2)
+        with col_normal_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_G1020,
+                                                            LABELS_USED[0]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[0],
+                    use_column_width=True)
+        with col_glaucoma_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_G1020,
+                                                            LABELS_USED[1]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[1],
+                    use_column_width=True)
+
+    ### refuge dataset
+    with tab_refuge:
+        st.subheader("Contoh Gambar", anchor="refuge-dataset")
+
+        col_normal_image, col_glaucoma_image = st.columns(2)
+        with col_normal_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_REFUGE,
+                                                            LABELS_USED[0]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[0],
+                    use_column_width=True)
+        with col_glaucoma_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_REFUGE,
+                                                            LABELS_USED[1]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[1],
+                    use_column_width=True)
+
+    ### papila dataset
+    with tab_papila:
+        st.subheader("Contoh Gambar", anchor="papila-dataset")
+
+        col_normal_image, col_glaucoma_image = st.columns(2)
+        with col_normal_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_PAPILA,
+                                                            LABELS_USED[0]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[0],
+                    use_column_width=True)
+        with col_glaucoma_image:
+            g_norm_imgs_name = dh.get_image_path(os.path.join(PATH_PAPILA,
+                                                            LABELS_USED[1]))
+            g_norm_imgs_array = dh.load_image_array(random.choice(g_norm_imgs_name))
+            st.image(g_norm_imgs_array,
+                    caption=LABELS_USED[1],
+                    use_column_width=True)
 
 
 ## summary and conclusion
