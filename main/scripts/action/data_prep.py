@@ -20,7 +20,7 @@ def create_destination_directory(path:str,
     """
     result_status = {
         "Success": [],
-        "Already Exists": [],
+        "Already Exists": []
     }
     for dataset_name in dataset_names:
         for label_name in label_names:
@@ -72,7 +72,7 @@ def copy_files(source_path:str,
     """
     result_status = {
         "Success": [],
-        "Already Exists": [],
+        "Already Exists": []
     }
     for file_name in file_names:
         try:
