@@ -7,7 +7,12 @@ def create_destination_directory(path:str,
                                 dataset_names:list,
                                 label_names:list,
                                 create_type:str="merge"):
-    """action to create destination directory for dataset
+    """action to create destination directory for dataset.
+    the directory will be created based on the dataset names and label names.
+    if the directory already exists, it will be skipped.
+    the directory will be created in the following format: path/dataset_name/label_name
+    the directory name will be train, val, and test if create_type is 'usage'.
+    if the create_type is 'merge', the directory name will be dataset_name and label_name
 
     Args:
         path (str): path where the dataset will be stored
@@ -25,6 +30,7 @@ def create_destination_directory(path:str,
     for dataset_name in dataset_names:
         for label_name in label_names:
             try:
+                # for data preparation step in the thesis
                 if create_type == "merge":
                     os.makedirs(os.path.join(path,
                                             dataset_name,
@@ -32,6 +38,7 @@ def create_destination_directory(path:str,
                     result_status["Success"].append(os.path.join(path,
                                                                 dataset_name,
                                                                 label_name))
+                # for data splitting step in the thesis
                 elif create_type == "usage":
                     for dataset_type in ['train', 'val', 'test']:
                         os.makedirs(os.path.join(path,
@@ -84,7 +91,7 @@ def copy_files(source_path:str,
     return result_status
 
 def fname_dict_df(file_names:dict, label_names:list):
-    """convert file names dictionary to dataframe
+    """convert file names from dictionary to dataframe
 
     Args:
         file_names (dict): a dictionary of file names with label names as keys and list of file names as values

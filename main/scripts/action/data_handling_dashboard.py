@@ -13,9 +13,9 @@ def load_dataframe(path:str):
     Returns:
         pandas.dataframe: dataframe of csv file
     """
-    if path.endswith(".xlsx"):
+    if path.endswith(".xlsx"): # excel file
         return pd.read_excel(path)
-    elif path.endswith(".csv"):
+    elif path.endswith(".csv"): # csv file
         return pd.read_csv(path)
 
 def get_image_path(path:str):
