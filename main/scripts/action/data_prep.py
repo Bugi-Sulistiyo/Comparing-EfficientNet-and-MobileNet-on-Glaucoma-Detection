@@ -31,6 +31,7 @@ def create_destination_directory(path:str,
         for label_name in label_names:
             try:
                 # for data preparation step in the thesis
+                # merge the source dataset file into the desired structure
                 if create_type == "merge":
                     os.makedirs(os.path.join(path,
                                             dataset_name,
@@ -40,13 +41,27 @@ def create_destination_directory(path:str,
                                                                 label_name))
                 # for data splitting step in the thesis
                 elif create_type == "usage":
+                    # using the train set, val set, and test set
                     for dataset_type in ['train', 'val', 'test']:
-                        os.makedirs(os.path.join(path,
-                                                dataset_type,
-                                                label_name))
-                        result_status["Success"].append(os.path.join(path,
-                                                                    dataset_type,
-                                                                    label_name))
+                        if dataset_type == 'train':
+                            # define the scenario directory on the train set
+                            for scenario in range(1,6):
+                                os.makedirs(os.path.join(path,
+                                                        dataset_type,
+                                                        f'scenario_{scenario}',
+                                                        label_name))
+                                result_status["Success"].append(os.path.join(path,
+                                                                            dataset_type,
+                                                                            f'scenario_{scenario}',
+                                                                            label_name))
+                        else:
+                            # define the directory on the val and test set
+                            os.makedirs(os.path.join(path,
+                                                    dataset_type,
+                                                    label_name))
+                            result_status["Success"].append(os.path.join(path,
+                                                                        dataset_type,
+                                                                        label_name))
             except FileExistsError:
                 result_status["Already Exists"].append(os.path.join(path,
                                                                     dataset_name,
@@ -140,9 +155,11 @@ def split_file(val_size:float, test_size:float,
     for folds, (train_val_index, test_index) in enumerate(stratified_kfold_train_test.split(df_file_name.file_name,
                                                                                             df_file_name.label)):
         # split the file names into train, val, and test
+        ## getting the train_val and test file names
         df_train_val_name = df_file_name.iloc[train_val_index]
         train_index, val_index = next(stratified_kfold_val_test.split(df_train_val_name.file_name,
                                                                         df_train_val_name.label))
+        ## getting the train, val, and test file names
         df_train_name = df_train_val_name.iloc[train_index]
         df_val_name = df_train_val_name.iloc[val_index]
         df_test_name = df_file_name.iloc[test_index]
@@ -156,7 +173,7 @@ def split_file(val_size:float, test_size:float,
         
         # copy files
         copy_result = {}
-        for dataset_type, df_name in zip(["train", "val", "test"],
+        for dataset_type, df_name in zip(["train/scenario_1", "val", "test"],
                                         [df_train_name, df_val_name, df_test_name]):
             copy_result[f'{dataset_type}'] = {}
             for label_name in df_file_name.label.unique():
