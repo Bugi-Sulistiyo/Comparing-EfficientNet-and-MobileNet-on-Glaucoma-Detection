@@ -43,25 +43,12 @@ def create_destination_directory(path:str,
                 elif create_type == "usage":
                     # using the train set, val set, and test set
                     for dataset_type in ['train', 'val', 'test']:
-                        if dataset_type == 'train':
-                            # define the scenario directory on the train set
-                            for scenario in range(1,6):
-                                os.makedirs(os.path.join(path,
-                                                        dataset_type,
-                                                        f'scenario_{scenario}',
-                                                        label_name))
-                                result_status["Success"].append(os.path.join(path,
-                                                                            dataset_type,
-                                                                            f'scenario_{scenario}',
-                                                                            label_name))
-                        else:
-                            # define the directory on the val and test set
-                            os.makedirs(os.path.join(path,
-                                                    dataset_type,
-                                                    label_name))
-                            result_status["Success"].append(os.path.join(path,
-                                                                        dataset_type,
-                                                                        label_name))
+                        os.makedirs(os.path.join(path,
+                                                dataset_type,
+                                                label_name))
+                        result_status["Success"].append(os.path.join(path,
+                                                                    dataset_type,
+                                                                    label_name))
             except FileExistsError:
                 result_status["Already Exists"].append(os.path.join(path,
                                                                     dataset_name,
@@ -173,7 +160,7 @@ def split_file(val_size:float, test_size:float,
         
         # copy files
         copy_result = {}
-        for dataset_type, df_name in zip(["train/scenario_1", "val", "test"],
+        for dataset_type, df_name in zip(["train", "val", "test"],
                                         [df_train_name, df_val_name, df_test_name]):
             copy_result[f'{dataset_type}'] = {}
             for label_name in df_file_name.label.unique():
