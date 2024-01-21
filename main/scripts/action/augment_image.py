@@ -26,7 +26,7 @@ def get_image(source_path:str,
             img_size:int,
             color_mode:str,
             batch_size:int):
-    """import image file from directory
+    """import a single image file from directory
 
     Args:
         source_path (str): the path where the image files are located
