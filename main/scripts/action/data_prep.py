@@ -133,7 +133,7 @@ def split_file(val_size:float, test_size:float,
     stratified_kfold_train_test = StratifiedKFold(n_splits=int(1/test_size),
                                                 shuffle=True,
                                                 random_state=random_state)
-    stratified_kfold_val_test = StratifiedKFold(n_splits=int(1/val_size),
+    stratified_kfold_train_val = StratifiedKFold(n_splits=int(1/val_size), # need revision
                                                 shuffle=True,
                                                 random_state=random_state)
 
@@ -144,7 +144,7 @@ def split_file(val_size:float, test_size:float,
         # split the file names into train, val, and test
         ## getting the train_val and test file names
         df_train_val_name = df_file_name.iloc[train_val_index]
-        train_index, val_index = next(stratified_kfold_val_test.split(df_train_val_name.file_name,
+        train_index, val_index = next(stratified_kfold_train_val.split(df_train_val_name.file_name,
                                                                         df_train_val_name.label))
         ## getting the train, val, and test file names
         df_train_name = df_train_val_name.iloc[train_index]
