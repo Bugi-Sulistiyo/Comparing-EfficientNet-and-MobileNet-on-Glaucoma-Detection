@@ -11,6 +11,10 @@ from tensorflow.keras.layers import RandomBrightness
 from tensorflow.keras.layers import RandomRotation
 from tensorflow.keras.layers import RandomFlip
 
+from tensorflow.image import flip_left_right
+from tensorflow.image import flip_up_down
+from tensorflow.image import stateless_random_brightness
+
 # clahe image processing for training data
 from tf_clahe import clahe
 
@@ -22,6 +26,61 @@ import os
 import numpy as np
 import tensorflow as tf
 
+def show_augmented_img(image:np.ndarray,
+                        augment_type:str,
+                        color_mode:str='rgb'):
+    """visualize the augmented image with comparison to the original image
+
+    Args:
+        image (np.ndarray): an image in the form of numpy array
+        augment_type (str): the type of augmentation (h_flip, v_flip, bright, rot)
+        color_mode (str, optional): the color mode of the image (gray or rgb). Defaults to 'rgb'.
+    """
+    plt.figure(figsize=(10, 10))
+
+    if augment_type == 'h_flip':
+        aug_img = flip_left_right(image)
+    elif augment_type == 'v_flip':
+        aug_img = flip_up_down(image)
+    elif augment_type == 'bright':
+        aug_img = stateless_random_brightness(image, 0.2, seed=(1915026018, 0))
+    elif augment_type == 'rot':
+        aug_rotate = RandomRotation(factor=(-0.5, 0.5), seed=1915026018)
+        aug_img = aug_rotate(image)
+    else:
+        aug_img = tf.convert_to_tensor(image)
+
+    if color_mode == 'gray':
+        plt.subplot(1, 2, 1)
+        plt.imshow(image, cmap='gray')
+        plt.subplot(1, 2, 2)
+        plt.imshow(aug_img.numpy(), cmap='gray')
+    elif color_mode == 'rgb':
+        plt.subplot(1, 2, 1)
+        plt.imshow(image)
+        plt.subplot(1, 2, 2)
+        plt.imshow(aug_img.numpy())
+    
+    plt.show()
+
+def clahe_augmentation(image,
+                        clip_limit):
+    """the augmentation for the image using clahe
+
+    Args:
+        batch_dataset (tf.data.Dataset): the batch dataset of the image
+
+    Returns:
+        tf.data.Dataset: the batch dataset of the image that has been augmented
+    """
+    # @tf.function(experimental_compile=True)
+    # def fast_clahe(image):
+    #     return clahe(image, gpu_optimized=True)
+    # return fast_clahe(image)
+    return clahe(image,
+                clip_limit=clip_limit)
+
+# =================             Experimentation             =================
 def get_image(source_path:str,
             img_width:int,
             img_height:int,
@@ -107,26 +166,3 @@ def basic_augment(batch_dataset:tf.data.Dataset,
                         seed=seed)
     ])
     return basic_augment_layer(image), label
-
-def clahe_augmentation(image,
-                        clip_limit):
-    """the augmentation for the image using clahe
-
-    Args:
-        batch_dataset (tf.data.Dataset): the batch dataset of the image
-
-    Returns:
-        tf.data.Dataset: the batch dataset of the image that has been augmented
-    """
-    # @tf.function(experimental_compile=True)
-    # def fast_clahe(image):
-    #     return clahe(image, gpu_optimized=True)
-    # return fast_clahe(image)
-    return clahe(image,
-                clip_limit=clip_limit)
-
-# def save_image(image:np.array,
-#                 destination_path:str,
-#                 data_format:str='channels_last',
-#                 file_format:str='jpg'):
-    
