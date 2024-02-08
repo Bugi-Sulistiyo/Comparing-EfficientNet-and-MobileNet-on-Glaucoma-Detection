@@ -23,14 +23,16 @@ import numpy as np
 import tensorflow as tf
 
 def get_image(source_path:str,
-            img_size:int,
+            img_width:int,
+            img_height:int,
             color_mode:str,
             batch_size:int):
     """import images from the given directory.
 
     Args:
         source_path (str): the path where the image files are located
-        img_size (int): the size of the image in pixels (square)
+        img_width (int): the width of the image
+        img_height (int): the height of the image
         color_mode (str): the color mode of the image (grayscale or rgb)
         batch_size (int): the size of the batch
 
@@ -38,7 +40,7 @@ def get_image(source_path:str,
         tf.data.Dataset: the image in the form of tensorflow dataset
     """
     return image_dataset_from_directory(directory = source_path,
-                                        image_size = (img_size, img_size),
+                                        image_size = (img_height, img_width),
                                         color_mode = color_mode,
                                         batch_size = batch_size,
                                         shuffle = True,
@@ -68,6 +70,7 @@ def visualize_image(batch_dataset:tf.data.Dataset,
             plt.imshow(images[i].numpy().astype("uint8"))
             plt.title(label_names[int(labels[i])])
             plt.axis("off")
+    plt.show()
 
 def basic_augment(batch_dataset:tf.data.Dataset,
                 flip_mode:str,
