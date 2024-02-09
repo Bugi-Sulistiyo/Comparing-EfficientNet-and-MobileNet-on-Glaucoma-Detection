@@ -66,7 +66,7 @@ def show_augmented_img(image:np.ndarray,
     elif augment_type == 'v_flip': # vertical flip
         aug_img = flip_up_down(image)
     elif augment_type == 'bright': # brightness
-        aug_rotate = RandomBrightness(factor=(0, 0.25),
+        aug_rotate = RandomBrightness(factor=(0, 0.15),
                                         value_range=[.0, 1.],
                                         seed=1915026018)
         aug_img = aug_rotate(image)
