@@ -38,7 +38,7 @@ def create_directory(path_dict:dict):
         "Success": [],
         "Already Exists": []
     }
-    
+    # create the directory
     for key, value in path_dict.items():
         try:
             os.makedirs(value)
@@ -58,21 +58,25 @@ def show_augmented_img(image:np.ndarray,
         augment_type (str): the type of augmentation (h_flip, v_flip, bright, rot)
         color_mode (str, optional): the color mode of the image (gray or rgb). Defaults to 'rgb'.
     """
+    # define the figure size
     plt.figure(figsize=(10, 10))
-
-    if augment_type == 'h_flip':
+    # do the augmentation based on the type
+    if augment_type == 'h_flip': # horizontal flip
         aug_img = flip_left_right(image)
-    elif augment_type == 'v_flip':
+    elif augment_type == 'v_flip': # vertical flip
         aug_img = flip_up_down(image)
-    elif augment_type == 'bright':
-        aug_rotate = RandomBrightness(factor=(0, 0.5), seed=1915026018)
+    elif augment_type == 'bright': # brightness
+        aug_rotate = RandomBrightness(factor=(0, 0.25),
+                                        value_range=[.0, 1.],
+                                        seed=1915026018)
         aug_img = aug_rotate(image)
-    elif augment_type == 'rot':
+    elif augment_type == 'rot': # rotation
         aug_rotate = RandomRotation(factor=(-0.5, 0.5), seed=1915026018)
         aug_img = aug_rotate(image)
-    else:
+    else: # no augmentation
         aug_img = tf.convert_to_tensor(image)
 
+    # visualize the image
     if color_mode == 'gray':
         plt.subplot(1, 2, 1)
         plt.imshow(image, cmap='gray')
@@ -96,10 +100,12 @@ def clahe_augmentation(image,
     Returns:
         tf.data.Dataset: the batch dataset of the image that has been augmented
     """
+    ## for the fast version of the clahe
     # @tf.function(experimental_compile=True)
     # def fast_clahe(image):
     #     return clahe(image, gpu_optimized=True)
     # return fast_clahe(image)
+    ## for the normal version of the clahe
     return clahe(image,
                 clip_limit=clip_limit)
 
