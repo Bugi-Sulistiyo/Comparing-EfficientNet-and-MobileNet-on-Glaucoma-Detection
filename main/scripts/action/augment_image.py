@@ -13,7 +13,6 @@ from tensorflow.keras.layers import RandomFlip
 
 from tensorflow.image import flip_left_right
 from tensorflow.image import flip_up_down
-from tensorflow.image import stateless_random_brightness
 
 # clahe image processing for training data
 from tf_clahe import clahe
@@ -25,6 +24,29 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import tensorflow as tf
+
+def create_directory(path_dict:dict):
+    """create directory based on the given dictionary
+
+    Args:
+        path_dict (dict): a dictionary of the path with the key as the name of the directory and the value as the path
+
+    Returns:
+        dict: a dictionary of the result status
+    """
+    result_status = {
+        "Success": [],
+        "Already Exists": []
+    }
+    
+    for key, value in path_dict.items():
+        try:
+            os.makedirs(value)
+            result_status["Success"].append(key)
+        except FileExistsError:
+            result_status["Already Exists"].append(key)
+    
+    return result_status
 
 def show_augmented_img(image:np.ndarray,
                         augment_type:str,
@@ -43,7 +65,8 @@ def show_augmented_img(image:np.ndarray,
     elif augment_type == 'v_flip':
         aug_img = flip_up_down(image)
     elif augment_type == 'bright':
-        aug_img = stateless_random_brightness(image, 0.2, seed=(1915026018, 0))
+        aug_rotate = RandomBrightness(factor=(0, 0.5), seed=1915026018)
+        aug_img = aug_rotate(image)
     elif augment_type == 'rot':
         aug_rotate = RandomRotation(factor=(-0.5, 0.5), seed=1915026018)
         aug_img = aug_rotate(image)
