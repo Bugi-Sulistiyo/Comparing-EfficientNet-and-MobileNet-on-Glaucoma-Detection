@@ -90,8 +90,7 @@ def show_augmented_img(image:np.ndarray,
     
     plt.show()
 
-def clahe_augmentation(image,
-                        clip_limit):
+def clahe_augmentation(image):
     """the augmentation for the image using clahe
 
     Args:
@@ -107,7 +106,7 @@ def clahe_augmentation(image,
     # return fast_clahe(image)
     ## for the normal version of the clahe
     return clahe(image,
-                clip_limit=clip_limit)
+                clip_limit=1.5)
 
 # =================             Experimentation             =================
 def get_image(source_path:str,
