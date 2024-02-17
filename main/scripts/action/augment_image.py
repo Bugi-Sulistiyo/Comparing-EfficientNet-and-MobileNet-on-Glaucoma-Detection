@@ -22,6 +22,8 @@ import matplotlib.pyplot as plt
 
 # other libraries
 import os
+import glob
+import time
 import numpy as np
 import tensorflow as tf
 
@@ -56,7 +58,7 @@ def show_augmented_img(image:np.ndarray,
     Args:
         image (np.ndarray): an image in the form of numpy array
         augment_type (str): the type of augmentation (h_flip, v_flip, bright, rot)
-        color_mode (str, optional): the color mode of the image (gray or rgb). Defaults to 'rgb'.
+        color_mode (str, optional): the color mode of the image (grayscale or rgb). Defaults to 'rgb'.
     """
     # define the figure size
     plt.figure(figsize=(10, 10))
@@ -77,7 +79,7 @@ def show_augmented_img(image:np.ndarray,
         aug_img = tf.convert_to_tensor(image)
 
     # visualize the image
-    if color_mode == 'gray':
+    if color_mode == 'grayscale':
         plt.subplot(1, 2, 1)
         plt.imshow(image, cmap='gray')
         plt.subplot(1, 2, 2)
@@ -107,6 +109,86 @@ def clahe_augmentation(image):
     ## for the normal version of the clahe
     return clahe(image,
                 clip_limit=1.5)
+
+def generate_aug_img(dataset_names:list,
+                    fold_names:list,
+                    labels_names:list,
+                    batch_datasets:dict,
+                    data_type:str):
+    """generate the augmented image from the image data generator
+
+    Args:
+        dataset_names (list): a list of the dataset names
+        fold_names (list): a list of the fold names
+        labels_names (list): a list of the label names
+        batch_datasets (dict): a dictionary of the batch datasets image generator
+        data_type (str): the type of data would be generated (train or val_test)
+    """
+    # generate the augmented image for the training data
+    if data_type == 'train':
+        # create the variabel to avoid infinite loop
+        exit_count = 0
+        for dataset in dataset_names:
+            for fold in fold_names:
+                for label in labels_names:
+                    # count the time to generate the augmented image
+                    start_time = time.perf_counter()
+                    print(f'Generating augmented image for {dataset}/{fold}/{label}...')
+                    img_count = len(batch_datasets[f'{dataset}_{fold}_{label}'])
+
+                    # generated process per batch
+                    for batch_datagen in batch_datasets[f'{dataset}_{fold}_{label}']:
+                        exit_count += 1
+                        if exit_count == img_count:
+                            exit_count = 0
+                            break
+                    
+                    print(f'Elapsed time: {time.perf_counter() - start_time:.2f} seconds')
+    # generate the augmented image for the validation and testing data
+    elif data_type == 'val_test':
+        # create the variabel to avoid infinite loop
+        exit_count = 0
+        for dataset in dataset_names:
+            for fold in fold_names:
+                for d_type in ['val', 'test']:
+                    for label in labels_names:
+                        # count the time to generate the augmented image
+                        start_time = time.perf_counter()
+                        print(f'Generating augmented image for {dataset}/{fold}/{label}...')
+                        img_count = len(batch_datasets[f'{dataset}_{fold}_{d_type}_{label}'])
+
+                        # generated process per batch
+                        for batch_datagen in batch_datasets[f'{dataset}_{fold}_{label}']:
+                            exit_count += 1
+                            if exit_count == img_count:
+                                exit_count = 0
+                                break
+                        
+                        print(f'Elapsed time: {time.perf_counter() - start_time:.2f} seconds')
+
+def get_file(files_code:list,
+            path_dest:dict,
+            scenario:str):
+    """get image name that has been augmented and removed for val and test data
+
+    Args:
+        files_code (list): a list of code name of the files
+        path_dest (dict): a dictionary that stores the path of the augmented files
+        scenario (str): the scenario name
+
+    Returns:
+        dict: a dictionary of the removed file and augmented file
+    """
+    rm_file = {}
+    aug_file = {}
+    for code_name in files_code:
+        rm_file[code_name] = glob.glob(os.path.join(path_dest[scenario
+                                                            + code_name[2:]],
+                                                    f'[!s3_]*'))
+        aug_file[code_name] = glob.glob(os.path.join(path_dest[scenario
+                                                            + code_name[2:]],
+                                                    f's3_*'))
+    return rm_file, aug_file
 
 def remove_file(files_path:list):
     """remove the files based on the given path
