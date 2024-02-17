@@ -108,6 +108,27 @@ def clahe_augmentation(image):
     return clahe(image,
                 clip_limit=1.5)
 
+def remove_file(files_path:list):
+    """remove the files based on the given path
+
+    Args:
+        files_path (list): a list of the path of the files to be removed
+
+    Returns:
+        dict: a dictionary of the result status
+    """
+    result_status = {
+        "Success": [],
+        "Not Found": []
+    }
+    for file_path in files_path:
+        try:
+            os.remove(file_path)
+            result_status["Success"].append(file_path)
+        except FileNotFoundError:
+            result_status["Not Found"].append(file_path)
+    return result_status
+
 # =================             Experimentation             =================
 def get_image(source_path:str,
             img_width:int,
