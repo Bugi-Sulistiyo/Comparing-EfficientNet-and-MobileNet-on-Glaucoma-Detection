@@ -184,10 +184,10 @@ def get_file(files_code:list,
     for code_name in files_code:
         rm_file[code_name] = glob.glob(os.path.join(path_dest[scenario
                                                             + code_name[2:]],
-                                                    f'[!s3_]*'))
+                                                    f'[!s{scenario[-1]}_]*'))
         aug_file[code_name] = glob.glob(os.path.join(path_dest[scenario
                                                             + code_name[2:]],
-                                                    f's3_*'))
+                                                    f's{scenario[-1]}_*'))
     return rm_file, aug_file
 
 def remove_file(files_path:list):
