@@ -151,20 +151,20 @@ def generate_aug_img(dataset_names:list,
         for dataset in dataset_names:
             for fold in fold_names:
                 for d_type in ['val', 'test']:
-                    for label in labels_names:
-                        # count the time to generate the augmented image
-                        start_time = time.perf_counter()
-                        print(f'Generating augmented image for {dataset}/{fold}/{label}...')
-                        img_count = len(batch_datasets[f'{dataset}_{fold}_{d_type}_{label}'])
+                    # count the time to generate the augmented image
+                    start_time = time.perf_counter()
+                    print(f'Generating augmented image for {dataset}/{fold}/{d_type}...')
 
+                    for label in labels_names:
+                        img_count = len(batch_datasets[f'{dataset}_{fold}_{d_type}_{label}'])
                         # generated process per batch
-                        for batch_datagen in batch_datasets[f'{dataset}_{fold}_{label}']:
+                        for batch_datagen in batch_datasets[f'{dataset}_{fold}_{d_type}_{label}']:
                             exit_count += 1
                             if exit_count == img_count:
                                 exit_count = 0
                                 break
                         
-                        print(f'Elapsed time: {time.perf_counter() - start_time:.2f} seconds')
+                    print(f'Elapsed time: {time.perf_counter() - start_time:.2f} seconds')
 
 def get_file(files_code:list,
             path_dest:dict,
