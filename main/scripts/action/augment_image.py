@@ -50,47 +50,31 @@ def create_directory(path_dict:dict):
     
     return result_status
 
-def show_augmented_img(image:np.ndarray,
-                        augment_type:str,
-                        color_mode:str='rgb'):
-    """visualize the augmented image with comparison to the original image
+def augment_img(image:np.ndarray,
+                aug_type:str):
+    """augment the image based on the given type
 
     Args:
         image (np.ndarray): an image in the form of numpy array
-        augment_type (str): the type of augmentation (h_flip, v_flip, bright, rot)
-        color_mode (str, optional): the color mode of the image (grayscale or rgb). Defaults to 'rgb'.
+        aug_type (str): the type of augmentation (h_flip, v_flip, bright)
+
+    Returns:
+        np.ndarray: the augmented image
     """
-    # define the figure size
-    plt.figure(figsize=(10, 10))
     # do the augmentation based on the type
-    if augment_type == 'h_flip': # horizontal flip
+    if aug_type == 'h_flip': # horizontal flip
         aug_img = flip_left_right(image)
-    elif augment_type == 'v_flip': # vertical flip
+    elif aug_type == 'v_flip': # vertical flip
         aug_img = flip_up_down(image)
-    elif augment_type == 'bright': # brightness
-        aug_rotate = RandomBrightness(factor=(0, 0.15),
+    elif aug_type == 'bright': # brightness
+        aug_brightness = RandomBrightness(factor=(0, 0.15),
                                         value_range=[.0, 1.],
                                         seed=1915026018)
-        aug_img = aug_rotate(image)
-    elif augment_type == 'rot': # rotation
-        aug_rotate = RandomRotation(factor=(-0.5, 0.5), seed=1915026018)
-        aug_img = aug_rotate(image)
+        aug_img = aug_brightness(image)
     else: # no augmentation
         aug_img = tf.convert_to_tensor(image)
-
-    # visualize the image
-    if color_mode == 'grayscale':
-        plt.subplot(1, 2, 1)
-        plt.imshow(image, cmap='gray')
-        plt.subplot(1, 2, 2)
-        plt.imshow(aug_img.numpy(), cmap='gray')
-    elif color_mode == 'rgb':
-        plt.subplot(1, 2, 1)
-        plt.imshow(image)
-        plt.subplot(1, 2, 2)
-        plt.imshow(aug_img.numpy())
     
-    plt.show()
+    return aug_img
 
 def clahe_augmentation(image):
     """the augmentation for the image using clahe
@@ -109,6 +93,91 @@ def clahe_augmentation(image):
     ## for the normal version of the clahe
     return clahe(image,
                 clip_limit=1.5)
+
+def visualize_img(datasets:list,
+                    labels:list,
+                    datagen:dict,
+                    aug:str,
+                    clahe:bool,
+                    col_mode:str,
+                    scenario:str):
+    """visualize the image and the augmented image
+
+    Args:
+        datasets (list): a list of the dataset names
+        labels (list): a list of the label names
+        datagen (dict): a dictionary of the image generator
+        aug (str): the type of augmentation
+        clahe (bool): the status of the clahe
+        col_mode (str): the color mode of the image (grayscale or rgb)
+        scenario (str): the scenario name
+    """
+    for dataset in datasets:
+        # describe the image size
+        plt.figure(figsize=(10, 10))
+        for img_place, label in enumerate(labels):
+            for batch_datagen in datagen[f'{dataset}_{label}']:
+                # stating the augmented image type
+                if clahe: # clahe augmentation
+                    aug_img = clahe_augmentation(batch_datagen[0][0]).numpy()
+                else: # other type augmentation
+                    aug_img = augment_img(image=batch_datagen[0][0],
+                                        aug_type=aug).numpy()
+                
+                if col_mode == 'grayscale': # for the grayscale image
+                    if img_place == 0: # for image with label "normal"
+                        # visualize the original image
+                        plt.subplot(2, 2, img_place+1)
+                        plt.title(label=label.title(),
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(batch_datagen[0][0], cmap='gray')
+                        # visualize the augmented image
+                        plt.subplot(2, 2, img_place+2)
+                        plt.title(label=f'Augment {label.title()}',
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(aug_img, cmap='gray')
+                    elif img_place == 1: # for image with label "glaukoma"
+                        # visualize the original image
+                        plt.subplot(2, 2, img_place+2)
+                        plt.title(label=label.title(),
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(batch_datagen[0][0], cmap='gray')
+                        # visualize the augmented image
+                        plt.subplot(2, 2, img_place+3)
+                        plt.title(label=f'Augment {label.title()}',
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(aug_img, cmap='gray')
+                elif col_mode == 'rgb': # for the rgb image
+                    if img_place == 0: # for image with label "normal"
+                        # visualize the original image
+                        plt.subplot(2, 2, img_place+1)
+                        plt.title(label=label.title(),
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(batch_datagen[0][0])
+                        # visualize the augmented image
+                        plt.subplot(2, 2, img_place+2)
+                        plt.title(label=f'Augment {label.title()}',
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(aug_img)
+                    elif img_place == 1: # for image with label "glaukoma"
+                        # visualize the original image
+                        plt.subplot(2, 2, img_place+2)
+                        plt.title(label=label.title(),
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(batch_datagen[0][0])
+                        # visualize the augmented image
+                        plt.subplot(2, 2, img_place+3)
+                        plt.title(label=f'Augment {label.title()}',
+                                    fontdict={'fontsize': 14})
+                        plt.imshow(aug_img)
+                break
+        # show the visualization for each dataset
+        plt.suptitle(t=f'{dataset.title()} {aug.title()} Augmentation\n{scenario.replace("_", " ").title()}',
+                    y=.93,
+                    verticalalignment='center',
+                    fontsize=16,
+                    fontweight='medium')
+        plt.show()
 
 def generate_aug_img(dataset_names:list,
                     fold_names:list,
