@@ -83,7 +83,8 @@ def visualize_img(datasets:list,
                     aug:str,
                     clahe:bool,
                     col_mode:str,
-                    scenario:str):
+                    scenario:str,
+                    plot_dest:str):
     """visualize the image and the augmented image
 
     Args:
@@ -94,10 +95,11 @@ def visualize_img(datasets:list,
         clahe (bool): the status of the clahe
         col_mode (str): the color mode of the image (grayscale or rgb)
         scenario (str): the scenario name
+        plot_dest (str): a path to save the visualization
     """
     for dataset in datasets:
         # describe the image size
-        plt.figure(figsize=(10, 10))
+        plt.figure(figsize=(9, 6))
         for img_place, label in enumerate(labels):
             for batch_datagen in datagen[f'{dataset}_{label}']:
                 # stating the augmented image type
@@ -144,7 +146,7 @@ def visualize_img(datasets:list,
                         plt.title(label=f'Augment {label.title()}',
                                     fontdict={'fontsize': 14})
                         plt.imshow(aug_img)
-                        
+
                     elif img_place == 1: # for image with label "glaukoma"
                         # visualize the original image
                         plt.subplot(2, 2, img_place+2)
@@ -163,7 +165,15 @@ def visualize_img(datasets:list,
                     verticalalignment='center',
                     fontsize=16,
                     fontweight='medium')
-        plt.show()
+        plt.savefig(fname=os.path.join(plot_dest,
+                                        f'{dataset}_{aug}_{scenario}.png'),
+                    dpi=300,
+                    format='png',
+                    metadata={
+                        'Title': f'{dataset.title()} {aug.title()} Augmentation {scenario.replace("_", " ").title()}',
+                        'Author': 'Bugi Sulistiyo',
+                        'Description': f'Visualization of {dataset.title()} {aug.title()} Augmentation\n{scenario.replace("_", " ").title()}',
+                    })
 
 def generate_aug_img(dataset_names:list,
                     fold_names:list,
