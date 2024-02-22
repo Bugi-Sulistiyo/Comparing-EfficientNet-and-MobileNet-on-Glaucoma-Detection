@@ -84,7 +84,6 @@ def visualize_img(datasets:list,
                     labels:list,
                     datagen:dict,
                     aug:str,
-                    clahe:bool,
                     col_mode:str,
                     scenario:str,
                     plot_dest:str):
@@ -95,7 +94,6 @@ def visualize_img(datasets:list,
         labels (list): a list of the label names
         datagen (dict): a dictionary of the image generator
         aug (str): the type of augmentation
-        clahe (bool): the status of the clahe
         col_mode (str): the color mode of the image (grayscale or rgb)
         scenario (str): the scenario name
         plot_dest (str): a path to save the visualization
@@ -109,14 +107,14 @@ def visualize_img(datasets:list,
         for img_place, label in enumerate(labels):
             for batch_datagen in datagen[f'{dataset}_{label}']:
                 # get the image based on the color mode
+                image = batch_datagen[0][0]
                 if col_mode == 'grayscale': # for the grayscale image
-                    image = augment_img(image=batch_datagen[0][0],
-                                        aug_type=col_mode).numpy()
+                    aug_img = augment_img(image=augment_img(image=image,
+                                                            aug_type=col_mode).numpy(),
+                                        aug_type=aug).numpy()
                 elif col_mode == 'rgb': # for the rgb image
-                    image = batch_datagen[0][0]
-
-                aug_img = augment_img(image=image,
-                                    aug_type=aug).numpy()
+                    aug_img = augment_img(image=image,
+                                        aug_type=aug).numpy()
                 
                 if col_mode == 'grayscale': # for the grayscale image
                     if img_place == 0: # for image with label "normal"
@@ -167,7 +165,7 @@ def visualize_img(datasets:list,
                         plt.title(label=f'Augment {label.title()}',
                                     fontdict={'fontsize': 14})
                         plt.imshow(aug_img)
-            break
+                break
         # save the visualization into a png file
         plt.savefig(fname=os.path.join(plot_dest,
                                         f'{scenario} {dataset} {aug}.png'),
