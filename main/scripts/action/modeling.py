@@ -44,6 +44,7 @@ def datagen(scenario_names:list,
                     train = 'train_augmented'
 
                 for data_type in [train, 'val', 'test']:
+                    print(f'Creating image data generator for {scenario} {dataset} {fold} {data_type}')
                     # create the image data generator
                     img_gen[f'{scenario}_'
                             + f'{dataset}_'
@@ -81,9 +82,10 @@ def model_base(model_name:str,
     if model_name == "mobilenet_v2":
         base_model = MobileNetV2(input_shape=img_shape,
                                 include_top=False,
-                                weights=None)
-        base_model.load_weights(os.path.join(path_model_src,
-                                            'mobilenet_v2.h5'))
+                                # weights=None
+                                )
+        # base_model.load_weights(os.path.join(path_model_src,
+        #                                     'mobilenet_v2.h5'))
     elif model_name == "mobilenet_v3small":
         base_model = MobileNetV3Small(input_shape=img_shape,
                                 include_top=False,
