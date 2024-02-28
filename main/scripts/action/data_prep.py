@@ -8,6 +8,7 @@ def create_destination_directory(path:str,
                                 label_names:list,
                                 create_type:str="merge"):
     """action to create destination directory for dataset.
+    this function should be used on data merging steps.
     the directory will be created based on the dataset names and label names.
     if the directory already exists, it will be skipped.
     the directory will be created in the following format: path/dataset_name/label_name
@@ -56,7 +57,7 @@ def create_destination_directory(path:str,
     return result_status
 
 def get_file_names(path:str):
-    """generate a list of file name from the given directory
+    """generate a list of file name from the given directory.
 
     Args:
         path (str): source directory
@@ -69,7 +70,7 @@ def get_file_names(path:str):
 def copy_files(source_path:str,
                 destination_path:str,
                 file_names:list):
-    """copy files from source directory to destination directory
+    """copy files from source directory to destination.
 
     Args:
         source_path (str): source directory
