@@ -1,5 +1,7 @@
-import tensorflow as tf
 import os
+import time
+import pandas as pd
+import matplotlib.pyplot as plt
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -10,13 +12,12 @@ from tensorflow.keras.applications.efficientnet_v2 import EfficientNetV2S, Effic
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 
 from tensorflow.keras.models import Model
+from tensorflow.keras.metrics import AUC, Precision, BinaryAccuracy, Recall
 
 def datagen(scenario_names:list,
             dataset_names:list,
             fold_names:list,
-            path_dataset_src:dict,
-            image_size:dict,
-            col_mode:dict):
+            path_dataset_src:dict):
     """create image data generator for each dataset and fold
 
     Args:
@@ -24,8 +25,6 @@ def datagen(scenario_names:list,
         dataset_names (list): a list of dataset names
         fold_names (list): a list of fold names
         path_dataset_src (dict): a dictionary of dataset source paths
-        image_size (dict): a dictionary of image sizes
-        col_mode (dict): a dictionary of color modes
 
     Returns:
         dictionary: a dictionary of image data generators
@@ -34,6 +33,7 @@ def datagen(scenario_names:list,
     datagen = ImageDataGenerator(rescale=1./255)
 
     img_gen = {}
+    image_size = (300, 300)
     for scenario in scenario_names:
         for dataset in dataset_names:
             for fold in fold_names:
@@ -54,8 +54,7 @@ def datagen(scenario_names:list,
                                                                 + f'{dataset}_'
                                                                 + f'{fold}_'
                                                                 + f'{data_type}'],
-                                                target_size=image_size[dataset],
-                                                color_mode=col_mode[scenario],
+                                                target_size=image_size,
                                                 class_mode='binary',
                                                 shuffle=True,
                                                 seed=1915026018)
@@ -63,13 +62,11 @@ def datagen(scenario_names:list,
     return img_gen
     
 def model_base(model_name:str,
-                img_shape:tuple,
                 path_model_src:str):
     """creating the model based on the trained model name
 
     Args:
         model_name (str): the name of the trained model to be used. (e.g. mobilenet_v2, mobilenet_v3small, mobilenet_v3large, efficientnet_v2s, efficientnet_v2m, efficientnet_v2l)
-        img_shape (tuple): the shape of the input image with the format (height, width, channels)
         path_model_src (str): the path of the trained model source
 
     Raises:
@@ -78,14 +75,16 @@ def model_base(model_name:str,
     Returns:
         tf.keras.models: a model based on the trained model name with the custom output layer
     """
+
+    img_shape = (300,300, 3)
     # defining the trained model
     if model_name == "mobilenet_v2":
         base_model = MobileNetV2(input_shape=img_shape,
                                 include_top=False,
-                                # weights=None
+                                weights=None
                                 )
-        # base_model.load_weights(os.path.join(path_model_src,
-        #                                     'mobilenet_v2.h5'))
+        base_model.load_weights(os.path.join(path_model_src,
+                                            'mobilenet_v2.h5'))
     elif model_name == "mobilenet_v3small":
         base_model = MobileNetV3Small(input_shape=img_shape,
                                 include_top=False,
@@ -133,3 +132,102 @@ def model_base(model_name:str,
     model = Model(inputs=base_model.input, outputs=prediction_model)
 
     return model
+
+def train_model(pre_trained:str,
+                    model_src:str,
+                    model_dest:str,
+                    model_name:str,
+                    datagen_train,
+                    datagen_val):
+    """training the model
+
+    Args:
+        pre_trained (str): the name of the trained model to be used. (e.g. mobilenet_v2, mobilenet_v3small, mobilenet_v3large, efficientnet_v2s, efficientnet_v2m, efficientnet_v2l)
+        model_src (str): the path of the pretrained model weight is stored
+        model_dest (str): the path of the trained model weight is stored
+        model_name (str): the name of model file will be stored
+        datagen_train (_type_): a datagenerator for training data
+        datagen_val (_type_): a datagenerator for validation data
+
+    Returns:
+        _type_: the result of the training
+    """
+    # declare the needed variables
+    ## variable for counting time
+    start_time = time.perf_counter()
+    ## variable for the model configuration
+    optimizer = 'adam'
+    loss_funct = 'binary_crossentropy'
+    metrices = [BinaryAccuracy(name='acc'),
+                AUC(name='auc'),
+                Precision(name='prc'),
+                Recall(name='sns')]
+    # variable for training
+    epoch = 15
+
+    # create the model structure
+    tl_mnet_v2 = model_base(model_name=pre_trained,
+                            path_model_src=model_src)
+    # configure the model
+    tl_mnet_v2.compile(optimizer=optimizer,
+                    loss=loss_funct,
+                    metrics=metrices)
+    
+    # train the model
+    result = tl_mnet_v2.fit(datagen_train,
+                validation_data=datagen_val,
+                epochs=epoch,
+                verbose=0)
+    
+    # save the model
+    tl_mnet_v2.save(os.path.join(model_dest,
+                                f'{model_name}.h5'))
+    
+    print(f'Training {model_name.split("_")[-1]} finished in {round(time.perf_counter() - start_time, 2)} seconds')
+    return result
+
+def train_result(result,
+                path_store:str,
+                type_name:str):
+    """visualize and store the training result
+
+    Args:
+        result (model.history): a model history
+        path_store (str): the path to store the result
+        type_name (str): the name of the model
+    """
+    # count the process time
+    start_time = time.perf_counter()
+    # store the result in csv file
+    result_df = pd.DataFrame(result.history)
+    result_df.to_csv(os.path.join(path_store,
+                                f'{type_name}_result.csv'),
+                    index=False)
+    
+    # visualize the result
+    for metric in list(result.history.keys())[:len(result.history.keys())//2]:
+        # create the figure
+        plt.figure(figsize=(10, 5),
+                    dpi=300)
+        
+        # plot the training and validation result
+        plt.plot(result_df[metric],
+                color='blue',
+                label=f'Training {metric}')
+        plt.plot(result_df[f'val_{metric}'],
+                color='red',
+                label=f'Validation {metric}')
+        
+        # set the title and label
+        plt.title(f'Training and Validation {metric}')
+        plt.xlabel('Epochs')
+        plt.ylabel(metric)
+        plt.legend()
+
+        # save the figure
+        plt.savefig(os.path.join(path_store,
+                                f'{type_name}_{metric}.png'),
+                    bbox_inches='tight',
+                    dpi=300)
+        plt.close()
+    print(f'Saving {type_name.split("_")[-1]} finished in {round(time.perf_counter() - start_time, 2)} seconds')
