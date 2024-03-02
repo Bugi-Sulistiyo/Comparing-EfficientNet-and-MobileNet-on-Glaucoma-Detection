@@ -17,7 +17,8 @@ from tensorflow.keras.metrics import AUC, Precision, BinaryAccuracy, Recall
 def datagen(scenario_names:list,
             dataset_names:list,
             fold_names:list,
-            path_dataset_src:dict):
+            path_dataset_src:dict,
+            usage:str):
     """create image data generator for each dataset and fold
 
     Args:
@@ -25,6 +26,7 @@ def datagen(scenario_names:list,
         dataset_names (list): a list of dataset names
         fold_names (list): a list of fold names
         path_dataset_src (dict): a dictionary of dataset source paths
+        usage(str): the purpose of datagen with value of (training or testing)
 
     Returns:
         dictionary: a dictionary of image data generators
@@ -35,15 +37,19 @@ def datagen(scenario_names:list,
     img_gen = {}
     image_size = (300, 300)
     for scenario in scenario_names:
+        if scenario == 'scenario_1':
+                    train = 'train'
+        else:
+            train = 'train_augmented'
+        
+        if usage == 'training':
+            data_types = [train, 'val']
+        elif usage == 'testing':
+            data_types = ['test']
+        
         for dataset in dataset_names:
             for fold in fold_names:
-
-                if scenario == 'scenario_1':
-                    train = 'train'
-                else:
-                    train = 'train_augmented'
-
-                for data_type in [train, 'val', 'test']:
+                for data_type in data_types:
                     print(f'Creating image data generator for {scenario} {dataset} {fold} {data_type}')
                     # create the image data generator
                     img_gen[f'{scenario}_'
