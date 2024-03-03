@@ -11,8 +11,44 @@ from tensorflow.keras.applications.efficientnet_v2 import EfficientNetV2S, Effic
 
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 
-from tensorflow.keras.models import Model
+from tensorflow.keras.models import Model, load_model
+
 from tensorflow.keras.metrics import AUC, Precision, BinaryAccuracy, Recall
+
+def get_path(scenario_names:list,
+            dataset_names:list,
+            fold_names:list,
+            path_source:str):
+    """get the path of the dataset source
+
+    Args:
+        scenario_names (list): a list of scenario names
+        dataset_names (list): a list of dataset names
+        fold_names (list): a list of fold names
+        path_source (str): the path of the dataset source
+
+    Returns:
+        dict: a dictionary of dataset source paths
+    """
+    path_dataset_src = {}
+    for scenario in scenario_names:
+        for dataset in dataset_names:
+            for fold in fold_names:
+                if scenario == 'scenario_1':
+                    train = 'train'
+                else:
+                    train = 'train_augmented'
+
+                for data_type in [train, 'val', 'test']:
+                    path_dataset_src[f'{scenario}_'
+                                + f'{dataset}_'
+                                + f'{fold}_'
+                                + f'{data_type}'] = os.path.join(path_source,
+                                                                scenario,
+                                                                dataset,
+                                                                fold,
+                                                                data_type)
+    return path_dataset_src
 
 def datagen(scenario_names:list,
             dataset_names:list,
@@ -237,3 +273,51 @@ def train_result(result,
                     dpi=300)
         plt.close()
     print(f'Saving {type_name.split("_")[-1]} finished in {round(time.perf_counter() - start_time, 2)} seconds')
+
+def testing_model(path_src:str,
+                model_name:str,
+                scenario:str,
+                folds:list,
+                datasets:list,
+                datagen):
+    """evaluate the model
+
+    Args:
+        path_src (str): the path where the trained model is stored
+        model_name (str): the model name
+        scenario (str): the scenario name
+        folds (list): a list of fold
+        datasets (list): a list of used dataset to train
+        datagen (_type_): the datagenrator for testing
+
+    Returns:
+        dict: a dictionary that stored the result of evaluation
+    """
+    # define a variable to store the result of evalution
+    result = {}
+
+    print(f'Evaluating the {model_name.replace("_", " ")}')
+    for dataset in datasets:
+        for fold in folds:
+            start_time = time.perf_counter()
+            model = load_model(os.path.join(path_src,
+                                            (f's{scenario.split("_")[-1]}_'
+                                                + f'{model_name}_'
+                                                + f'{dataset}_'
+                                                + f'f{fold.split("_")[-1]}'
+                                                + '.h5')))
+            loss, acc, auc, prc, sns = model.evaluate(datagen[f'{scenario}_'
+                                                    + f'{dataset}_'
+                                                    + f'{fold}_'
+                                                    + 'test'],
+                                                    verbose=0)
+            result[f'{scenario}_'
+                    + f'{dataset}_'
+                    + f'{fold}'] = {'loss':loss,
+                                    'accuracy':acc,
+                                    'auc':auc,
+                                    'precision':prc,
+                                    'sensitivity':sns}
+            print(f'Testing {dataset} {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
+    
+    return result
