@@ -1,6 +1,7 @@
 import os
 import time
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -311,6 +312,12 @@ def testing_model(path_src:str,
                                                     + f'{fold}_'
                                                     + 'test'],
                                                     verbose=0)
+            
+            predict = model.predict(datagen[f'{scenario}_'
+                                        + f'{dataset}_'
+                                        + f'{fold}_'
+                                        + 'test'])
+
             result[f'{scenario}_'
                     + f'{dataset}_'
                     + f'{fold}'] = {'loss':loss,
@@ -319,5 +326,7 @@ def testing_model(path_src:str,
                                     'precision':prc,
                                     'sensitivity':sns}
             print(f'Testing {dataset} {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
+            break
+        break
     
-    return result
+    return result, predict
