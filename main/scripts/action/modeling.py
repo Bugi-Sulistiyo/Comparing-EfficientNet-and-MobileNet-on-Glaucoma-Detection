@@ -1,7 +1,6 @@
 import os
 import time
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -365,3 +364,48 @@ def testing_model(path_src:str,
                                     f'{scenario}_{model_name}_{dataset}_evaluation_result.csv'),
                                     index=False)
     return result
+
+def get_result_data(path:str):
+    """getting the result data from testing the model
+
+    Args:
+        path (str): the path of the result data is stored
+
+    Returns:
+        list: a list of result data path
+    """
+    path_files = {}
+    try:
+        files_name =  os.listdir(path)
+        for file in files_name:
+            if file.endswith('.csv'):
+                path_files[file.split('.')[0]] = os.path.join(path,
+                                                            file)
+        return path_files
+    except:
+        return 'No data found'
+
+def merge_result_data(path_src:str):
+    """merge all the result data from testing the model
+
+    Args:
+        path_src (str): the path of the result data is stored
+
+    Returns:
+        pd.DataFrame: a dataframe that stored the result of evaluation
+    """
+    df_result = pd.DataFrame({
+        'model': [],
+        'scenario': [],
+        'dataset': [],
+        'fold': [],
+        'loss': [],
+        'accuracy': [],
+        'auc': [],
+        'precision': [],
+        'sensitivity': []
+    })
+    for value in get_result_data(path_src).values():
+        df_result = pd.concat([df_result,
+                            pd.read_csv(value)])
+    return df_result
