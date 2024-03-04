@@ -399,11 +399,11 @@ def merge_result_data(path_src:str):
         'scenario': [],
         'dataset': [],
         'fold': [],
-        'loss': [],
-        'accuracy': [],
         'auc': [],
+        'accuracy': [],
         'precision': [],
-        'sensitivity': []
+        'sensitivity': [],
+        'loss': []
     })
     for value in get_result_data(path_src).values():
         df_result = pd.concat([df_result,
