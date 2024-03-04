@@ -275,58 +275,93 @@ def train_result(result,
         plt.close()
     print(f'Saving {type_name.split("_")[-1]} finished in {round(time.perf_counter() - start_time, 2)} seconds')
 
+def eval_result_save(path_dest:str,
+                    result:dict,
+                    scenario:str,
+                    model:str):
+    """save the evaluation result as csv file
+
+    Args:
+        path_dest (str): the path to store the result
+        result (dict): a dictionary that stored the result of evaluation
+        scenario (str): the scenario name
+        model (str) : the model name
+    """
+    pd.DataFrame(result).to_csv(os.path.join(path_dest,
+                                f'{scenario}_{model}_evaluation_result.csv'),
+                                index=False)
+
 def testing_model(path_src:str,
-                model_name:str,
                 scenario:str,
+                models:list,
                 folds:list,
                 datasets:list,
-                datagen):
+                datagen,
+                path_dest:str):
     """evaluate the model
 
     Args:
         path_src (str): the path where the trained model is stored
-        model_name (str): the model name
         scenario (str): the scenario name
+        models (list): a list of model name
         folds (list): a list of fold
         datasets (list): a list of used dataset to train
         datagen (_type_): the datagenrator for testing
+        path_dest (str): the path that will store the result
 
     Returns:
         dict: a dictionary that stored the result of evaluation
     """
-    # define a variable to store the result of evalution
-    result = {}
+    for model_name in models:
+        print(f'\n\nEvaluating the {model_name}')
+            # define a variable to store the result of evalution
+        
+        for dataset in datasets:
+            print(f'start the {dataset} dataset')
+            result = {'model': [],
+                    'scenario': [],
+                    'dataset': [],
+                    'fold': [],
+                    'loss': [],
+                    'accuracy': [],
+                    'auc': [],
+                    'precision': [],
+                    'sensitivity': []}
 
-    print(f'Evaluating the {model_name.replace("_", " ")}')
-    for dataset in datasets:
-        for fold in folds:
-            start_time = time.perf_counter()
-            model = load_model(os.path.join(path_src,
-                                            (f's{scenario.split("_")[-1]}_'
+            for fold in folds:
+                # count the process time
+                start_time = time.perf_counter()
+                # load the testing data
+                data_test = datagen[f'{scenario}_'
+                                    + f'{dataset}_'
+                                    + f'{fold}_'
+                                    + 'test']
+                
+                # load the model
+                model = load_model(os.path.join(path_src,
+                                                (f's{scenario.split("_")[-1]}_'
                                                 + f'{model_name}_'
                                                 + f'{dataset}_'
                                                 + f'f{fold.split("_")[-1]}'
                                                 + '.h5')))
-            loss, acc, auc, prc, sns = model.evaluate(datagen[f'{scenario}_'
-                                                    + f'{dataset}_'
-                                                    + f'{fold}_'
-                                                    + 'test'],
-                                                    verbose=0)
-            
-            predict = model.predict(datagen[f'{scenario}_'
-                                        + f'{dataset}_'
-                                        + f'{fold}_'
-                                        + 'test'])
+                # evaluate the model
+                loss, acc, auc, prc, sns = model.evaluate(data_test,
+                                                        verbose=0)
 
-            result[f'{scenario}_'
-                    + f'{dataset}_'
-                    + f'{fold}'] = {'loss':loss,
-                                    'accuracy':acc,
-                                    'auc':auc,
-                                    'precision':prc,
-                                    'sensitivity':sns}
-            print(f'Testing {dataset} {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
-            break
-        break
-    
-    return result, predict
+                # store the result
+                result['model'].append(model_name)
+                result['scenario'].append(scenario)
+                result['dataset'].append(dataset)
+                result['fold'].append(fold)
+                result['loss'].append(loss)
+                result['accuracy'].append(acc)
+                result['auc'].append(auc)
+                result['precision'].append(prc)
+                result['sensitivity'].append(sns)
+
+                print(f'Testing {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
+            # save the result
+            pd.DataFrame(result).to_csv(os.path.join(path_dest,
+                                    f'{scenario}_{model_name}_{dataset}_evaluation_result.csv'),
+                                    index=False)
+    return result
