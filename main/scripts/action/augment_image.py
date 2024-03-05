@@ -165,7 +165,7 @@ def generate_aug_img(dataset_names:list,
                 for label in labels_names:
                     # count the time to generate the augmented image
                     start_time = time.perf_counter()
-                    print(f'Generating augmented image for {dataset}/{fold}/{label}...')
+                    print(f'Generating augmented image for {dataset} f{fold.split("_")[-1]} {label}...')
                     img_count = len(batch_datasets[f'{dataset}_{fold}_{label}'])
 
                     # generated process per batch
@@ -185,7 +185,7 @@ def generate_aug_img(dataset_names:list,
                 for d_type in ['val', 'test']:
                     # count the time to generate the augmented image
                     start_time = time.perf_counter()
-                    print(f'Generating augmented image for {dataset}/{fold}/{d_type}...')
+                    print(f'Generating augmented image for {dataset} f{fold.split("_")[-1]} {d_type}...')
 
                     for label in labels_names:
                         img_count = len(batch_datasets[f'{dataset}_{fold}_{d_type}_{label}'])
