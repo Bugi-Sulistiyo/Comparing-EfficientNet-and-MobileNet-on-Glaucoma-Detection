@@ -141,6 +141,7 @@ def visualize_img(datasets:list,
                         'Author': 'Bugi Sulistiyo',
                         'Description': f'Visualization of {dataset.title()} {aug.title()} Augmentation\n{scenario.replace("_", " ").title()}'
                     })
+        plt.close()
 
 def generate_aug_img(dataset_names:list,
                     fold_names:list,
