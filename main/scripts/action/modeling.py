@@ -287,24 +287,22 @@ def testing_model(path_src:str,
         dict: a dictionary that stored the result of evaluation
     """
     for model_name in models:
-        print(f'\n\nEvaluating the {model_name}')
-            # define a variable to store the result of evalution
-        
         for dataset in datasets:
-            print(f'start the {dataset} dataset')
+            # count the process time
+            start_time = time.perf_counter()
+            # define a variable to store the result of evalution
             result = {'model': [],
                     'scenario': [],
                     'dataset': [],
                     'fold': [],
                     'loss': [],
-                    'accuracy': [],
                     'auc': [],
-                    'precision': [],
-                    'sensitivity': []}
+                    'true_positive': [],
+                    'true_negative': [],
+                    'false_positive': [],
+                    'false_negative': []}
 
             for fold in folds:
-                # count the process time
-                start_time = time.perf_counter()
                 # load the testing data
                 data_test = datagen[f'{scenario}_'
                                     + f'{dataset}_'
@@ -319,8 +317,8 @@ def testing_model(path_src:str,
                                                 + f'f{fold.split("_")[-1]}'
                                                 + '.h5')))
                 # evaluate the model
-                loss, acc, auc, prc, sns = model.evaluate(data_test,
-                                                        verbose=0)
+                loss, auc, tp, tn, fp, fn = model.evaluate(data_test,
+                                                    verbose=0)
 
                 # store the result
                 result['model'].append(model_name)
@@ -328,12 +326,13 @@ def testing_model(path_src:str,
                 result['dataset'].append(dataset)
                 result['fold'].append(fold)
                 result['loss'].append(loss)
-                result['accuracy'].append(acc)
                 result['auc'].append(auc)
-                result['precision'].append(prc)
-                result['sensitivity'].append(sns)
+                result['true_positive'].append(tp)
+                result['true_negative'].append(tn)
+                result['false_positive'].append(fp)
+                result['false_negative'].append(fn)
 
-                print(f'Testing {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
+            print(f'Completed {model_name} {dataset} in {round(time.perf_counter() - start_time, 2)} seconds')
             # save the result
             pd.DataFrame(result).to_csv(os.path.join(path_dest,
                                     f'{scenario}_{model_name}_{dataset}_evaluation_result.csv'),
@@ -374,11 +373,12 @@ def merge_result_data(path_src:str):
         'scenario': [],
         'dataset': [],
         'fold': [],
+        'loss': [],
         'auc': [],
-        'accuracy': [],
-        'precision': [],
-        'sensitivity': [],
-        'loss': []
+        'true_positive': [],
+        'true_negative': [],
+        'false_positive': [],
+        'false_negative': []
     })
     for value in get_result_data(path_src).values():
         df_result = pd.concat([df_result,
