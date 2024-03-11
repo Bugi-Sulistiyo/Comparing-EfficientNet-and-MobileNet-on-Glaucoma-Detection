@@ -13,7 +13,7 @@ from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 
 from tensorflow.keras.models import Model, load_model
 
-from tensorflow.keras.metrics import AUC, Precision, BinaryAccuracy, Recall
+from tensorflow.keras.metrics import AUC, TruePositives, TrueNegatives, FalsePositives, FalseNegatives
 
 def get_path(scenario_names:list,
             dataset_names:list,
@@ -37,7 +37,7 @@ def get_path(scenario_names:list,
                 if scenario == 'scenario_1':
                     train = 'train'
                 else:
-                    train = 'train_augmented'
+                    train = 'train_merged'
 
                 for data_type in [train, 'val', 'test']:
                     path_dataset_src[f'{scenario}_'
@@ -74,9 +74,9 @@ def datagen(scenario_names:list,
     image_size = (300, 300)
     for scenario in scenario_names:
         if scenario == 'scenario_1':
-                    train = 'train'
+            train = 'train'
         else:
-            train = 'train_augmented'
+            train = 'train_merged'
         
         if usage == 'training':
             data_types = [train, 'val']
@@ -176,11 +176,13 @@ def model_base(model_name:str,
     return model
 
 def train_model(pre_trained:str,
-                    model_src:str,
-                    model_dest:str,
-                    model_name:str,
-                    datagen_train,
-                    datagen_val):
+                model_src:str,
+                model_dest:str,
+                model_name:str,
+                datagen_train,
+                datagen_val,
+                dataset:str,
+                fold:str):
     """training the model
 
     Args:
@@ -190,6 +192,8 @@ def train_model(pre_trained:str,
         model_name (str): the name of model file will be stored
         datagen_train (_type_): a datagenerator for training data
         datagen_val (_type_): a datagenerator for validation data
+        dataset (str): the name of the dataset
+        fold (str): the name of the fold
 
     Returns:
         _type_: the result of the training
@@ -200,10 +204,11 @@ def train_model(pre_trained:str,
     ## variable for the model configuration
     optimizer = 'adam'
     loss_funct = 'binary_crossentropy'
-    metrices = [BinaryAccuracy(name='acc'),
-                AUC(name='auc'),
-                Precision(name='prc'),
-                Recall(name='sns')]
+    metrices = [AUC(name='auc'),
+                TruePositives(name='tp'),
+                TrueNegatives(name='tn'),
+                FalsePositives(name='fp'),
+                FalseNegatives(name='fn')]
     # variable for training
     epoch = 15
 
@@ -225,7 +230,7 @@ def train_model(pre_trained:str,
     tl_mnet_v2.save(os.path.join(model_dest,
                                 f'{model_name}.h5'))
     
-    print(f'Training {model_name.split("_")[-1]} finished in {round(time.perf_counter() - start_time, 2)} seconds')
+    print(f'{dataset} {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
     return result
 
 def train_result(result,
@@ -238,41 +243,11 @@ def train_result(result,
         path_store (str): the path to store the result
         type_name (str): the name of the model
     """
-    # count the process time
-    start_time = time.perf_counter()
     # store the result in csv file
     result_df = pd.DataFrame(result.history)
     result_df.to_csv(os.path.join(path_store,
-                                f'{type_name}_result.csv'),
+                                f'{type_name}.csv'),
                     index=False)
-    
-    # visualize the result
-    for metric in list(result.history.keys())[:len(result.history.keys())//2]:
-        # create the figure
-        plt.figure(figsize=(10, 5),
-                    dpi=300)
-        
-        # plot the training and validation result
-        plt.plot(result_df[metric],
-                color='blue',
-                label=f'Training {metric}')
-        plt.plot(result_df[f'val_{metric}'],
-                color='red',
-                label=f'Validation {metric}')
-        
-        # set the title and label
-        plt.title(f'Training and Validation {metric}')
-        plt.xlabel('Epochs')
-        plt.ylabel(metric)
-        plt.legend()
-
-        # save the figure
-        plt.savefig(os.path.join(path_store,
-                                f'{type_name}_{metric}.png'),
-                    bbox_inches='tight',
-                    dpi=300)
-        plt.close()
-    print(f'Saving {type_name.split("_")[-1]} finished in {round(time.perf_counter() - start_time, 2)} seconds')
 
 def eval_result_save(path_dest:str,
                     result:dict,
