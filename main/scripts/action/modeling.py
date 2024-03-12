@@ -1,7 +1,11 @@
 import os
 import time
+
+import numpy as np
 import pandas as pd
+
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -384,3 +388,50 @@ def merge_result_data(path_src:str):
         df_result = pd.concat([df_result,
                             pd.read_csv(value)])
     return df_result
+
+# def plot_result()
+
+def confusion_matrix_plot_highest(result:pd.DataFrame,
+                                place:int,
+                                model_name:str,
+                                path_dest:str):
+    """plot the confusion matrix
+
+    Args:
+        result (pd.DataFrame): a dataframe that stored the result of evaluation. should contain the columns of true_positive, false_positive, false_negative, true_negative.
+        place (int): the index of the data that will be used to plot the confusion matrix
+        model_name (str): the name of the model
+        path_dest (str): the path to store the confusion matrix plot
+    """
+    # prepare the dataframe
+    c_matrix = np.round(result.loc[place,
+                        ['true_positive',
+                        'false_positive',
+                        'false_negative',
+                        'true_negative']].values.astype(np.float32)).astype(np.int32).reshape(2,2)
+
+    # plot the confusion matrix
+    ## configure the plot
+    plt.figure(figsize=(8,5))
+    plt.title(f'Confusion Matrix {model_name}',
+                fontsize=17)
+    sns.set(font_scale=1.4)
+    ## create the heatmap
+    sns.heatmap(c_matrix,
+                annot=True,
+                fmt='d',
+                cmap='Blues',
+                xticklabels=['Normal', 'Glaucoma'],
+                yticklabels=['Normal', 'Glaucoma'],
+                annot_kws={'size': 18})
+    ## save the plot
+    plt.savefig(fname=os.path.join(path_dest,
+                            f'confusion_matrix_{model_name}.png'),
+                dpi=300,
+                format='png',
+                metadata={
+                        'Title': f'confusion_matrix_{model_name}',
+                        'Author': 'Bugi Sulistiyo',
+                        'Description': f'Visualization of confusion_matrix {model_name}'
+                    })
+    plt.show()
