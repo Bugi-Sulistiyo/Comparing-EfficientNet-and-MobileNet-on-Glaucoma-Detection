@@ -394,7 +394,8 @@ def merge_result_data(path_src:str):
 def confusion_matrix_plot_highest(result:pd.DataFrame,
                                 place:int,
                                 model_name:str,
-                                path_dest:str):
+                                path_dest:str,
+                                file_name:str):
     """plot the confusion matrix
 
     Args:
@@ -402,6 +403,7 @@ def confusion_matrix_plot_highest(result:pd.DataFrame,
         place (int): the index of the data that will be used to plot the confusion matrix
         model_name (str): the name of the model
         path_dest (str): the path to store the confusion matrix plot
+        file_name (str): the name of the confusion matrix plot
     """
     # prepare the dataframe
     c_matrix = np.round(result.loc[place,
@@ -426,7 +428,7 @@ def confusion_matrix_plot_highest(result:pd.DataFrame,
                 annot_kws={'size': 18})
     ## save the plot
     plt.savefig(fname=os.path.join(path_dest,
-                            f'confusion_matrix_{model_name}.png'),
+                            f'confusion_matrix_{file_name}.png'),
                 dpi=300,
                 format='png',
                 metadata={
