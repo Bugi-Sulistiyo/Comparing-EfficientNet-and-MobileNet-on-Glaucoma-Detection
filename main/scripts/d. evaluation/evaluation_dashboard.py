@@ -16,6 +16,7 @@ PATH_DATA = os.environ.get('PATH_DATA_DASHBOARD')
 PATH_DATASET = os.environ.get('PATH_DATASET_COMBINED')
 PATH_SAMPLE = os.environ.get('PATH_DATA_AUG_SAMPLE')
 PATH_EV_RESULT = os.environ.get('PATH_EVALUATION_RESULT')
+PATH_CONTENT = os.environ.get('PATH_DASHBOARD_CONTENT')
 ### data path
 PATH_AUTHOR_DATA = os.path.join(PATH_DATA, 'author_info.csv')
 PATH_DATASET_DATA = os.path.join(PATH_DATA, 'dataset_info.csv')
@@ -123,59 +124,66 @@ def show_val_result(name:str):
     st.image(os.path.join(PATH_EV_RESULT, f'confusion_matrix_{name}_general_best.png'),
             use_column_width=True)
 
+def show_content(name:str):
+    """showing the content in the dashboard in a template
+
+    Args:
+        name (str): the name of the content file
+    """
+    st.markdown(f'<div style="text-align: justify;">{evaluation.content(path=os.path.join(PATH_CONTENT, name))}</div>',
+                unsafe_allow_html=True)
 
 # dasboard section
 ## summary and title
 with st.container():
     st.title("Evaluasi Model Klasifikasi Glaukoma",
                 anchor="judul-laporan")
-    st.markdown(f"<div style='text-align: justify;'>{LOREM_IPSUM100}</div>",
-                unsafe_allow_html=True)
+    show_content(name='summary')
 
-# ## info dataset
-# with st.container():
-#     ### dataset summary
-#     dataset_info_df = evaluation.load_df(path=PATH_DATASET_DATA)
-#     st.header("Dataset", anchor="info-dataset")
-#     st.markdown(f"<div style='text-align: justify;'>{LOREM_IPSUM10}</div><br>",
-#                 unsafe_allow_html=True)
-#     st.dataframe(dataset_info_df.loc[:, ~dataset_info_df.columns.isin(['Link', 'Sumber'])],
-#                 hide_index=True, use_container_width=True)
+## info dataset
+with st.container():
+    ### dataset summary
+    dataset_info_df = evaluation.load_df(path=PATH_DATASET_DATA)
+    st.header("Dataset", anchor="info-dataset")
 
-#     ### example image
-#     st.subheader('Contoh Data Citra', anchor=f'image-dataset')
-#     tab_rimone, tab_g1020, tab_refuge, tab_papila = st.tabs(["RIM-ONE",
-#                                                             "G1020",
-#                                                             "REFUGE",
-#                                                             "PAPILA"])
+    st.dataframe(dataset_info_df.loc[:, ~dataset_info_df.columns.isin(['Link', 'Sumber'])],
+                hide_index=True, use_container_width=True)
+    show_content(name='dataset_info')
 
-#     with tab_rimone:
-#         example_img(path=PATH_RIMONE,
-#                     label=LABELS_USED)
-#     with tab_g1020:
-#         example_img(path=PATH_G1020,
-#                     label=LABELS_USED)
-#     with tab_refuge:
-#         example_img(path=PATH_REFUGE,
-#                     label=LABELS_USED)
-#     with tab_papila:
-#         example_img(path=PATH_PAPILA,
-#                     label=LABELS_USED)
+    ### example image
+    st.subheader('Contoh Data Citra', anchor=f'image-dataset')
+    tab_rimone, tab_g1020, tab_refuge, tab_papila = st.tabs(["RIM-ONE",
+                                                            "G1020",
+                                                            "REFUGE",
+                                                            "PAPILA"])
 
-# ## scenario info
-# with st.container():
-#     st.header("Skenario", anchor="info-scenario")
-#     st.markdown(f"<div style='text-align: justify;'>{LOREM_IPSUM100}</div><br>",
-#                 unsafe_allow_html=True)
-#     scenario_guide_df = evaluation.load_df(path=PATH_SKENARIO_DATA)
-#     st.dataframe(scenario_guide_df.style.hide(),
-#                 hide_index=True, use_container_width=True)
+    with tab_rimone:
+        example_img(path=PATH_RIMONE,
+                    label=LABELS_USED)
+    with tab_g1020:
+        example_img(path=PATH_G1020,
+                    label=LABELS_USED)
+    with tab_refuge:
+        example_img(path=PATH_REFUGE,
+                    label=LABELS_USED)
+    with tab_papila:
+        example_img(path=PATH_PAPILA,
+                    label=LABELS_USED)
+
+## scenario info
+with st.container():
+    st.header("Skenario", anchor="info-scenario")
+    scenario_guide_df = evaluation.load_df(path=PATH_SKENARIO_DATA)
+    st.dataframe(scenario_guide_df.style.hide(),
+                hide_index=True, use_container_width=True)
+    show_content(name='scenario_info')
     
-#     ## each scenario
-#     st.subheader('Citra Hasil Augmentasi', anchor='image-scenario')
-#     tab_s1, tab_s2, tab_s3 = st.tabs(["Skenario 1",
-#                                         "Skenario 2",
-#                                         "Skenario 3"])
+    ## each scenario
+    st.subheader('Citra Hasil Augmentasi', anchor='image-scenario')
+    tab_s1, tab_s2, tab_s3 = st.tabs(["Skenario 1",
+                                        "Skenario 2",
+                                        "Skenario 3"])
+    # change the background color of the tab
     st.markdown("""
         <style>
             .stTabs [data-baseweb="tab-panel"]{
@@ -186,21 +194,22 @@ with st.container():
             }
         </style>""", unsafe_allow_html=True)
     
-    # with tab_s1:
-    #     scenario_img(scenario=1,
-    #                 augment_type={'no augmentation':'no'})
-    # with tab_s2:
-    #     scenario_img(scenario=2,
-    #                 augment_type=AUG_LIST)
-    # with tab_s3:
-    #     scenario_img(scenario=3,
-    #                 augment_type=AUG_LIST)
+    with tab_s1:
+        scenario_img(scenario=1,
+                    augment_type={'no augmentation':'no'})
+    with tab_s2:
+        scenario_img(scenario=2,
+                    augment_type=AUG_LIST)
+    with tab_s3:
+        scenario_img(scenario=3,
+                    augment_type=AUG_LIST)
 
 
 ## model result
 with st.container():
     st.header("Performa Model", anchor="hasil-evaluasi")
 
+    ### result based on the scenario
     st.subheader("Berdasarkan Skenario", anchor="skenario-evaluasi")
     tab_s1, tab_s2, tab_s3 = st.tabs(['Skenario 1',
                                         'Skenario 2',
@@ -213,6 +222,7 @@ with st.container():
     with tab_s3:
         show_val_result('s3')
 
+    ### result based on the dataset
     st.subheader("Berdasarkan Dataset", anchor="dataset-evaluasi")
     tab_ev_rimone, tab_ev_g1020, tab_ev_refuge, tab_ev_papila = st.tabs(['Rim-One',
                                                                         'G1020',
@@ -228,16 +238,28 @@ with st.container():
     with tab_ev_papila:
         show_val_result('papila')
     
-    st.markdown(f"<div style='text-align: justify;'>{LOREM_IPSUM100}</div>",
-                unsafe_allow_html=True)
+    show_content(name='evaluation_result_specify')
     
+    ### best model and generalt result
+    st.subheader("Model Terbaik dan Hasil Evaluasi Umum", anchor="model-terbaik")
+    
+    df_result = evaluation.load_df(path=os.path.join(PATH_EV_RESULT, f'general_result.csv'))
 
+    df_columns = [evaluation.string_upper(name) for name in df_result.columns]
+    df_result.columns = df_columns
+
+    st.dataframe(df_result.style \
+                    .highlight_max(axis=0, subset=df_result.columns[-4:],
+                                    props='color:black;background-color:#EE4540') \
+                    .format(evaluation.string_upper),
+                hide_index=True, use_container_width=True)
+    
+    show_content(name='evaluation_result_general')
 
 ## summary and conclusion
 with st.container():
     st.header("Kesimpulan", anchor="kesimpulan")
-    st.markdown(f"<div style='text-align: justify;'>{LOREM_IPSUM100}</div><br>",
-                unsafe_allow_html=True)
+    show_content(name='conclusion')
 
 ## sidebar
 st.sidebar.header("Judul", anchor="Info Penelitian")

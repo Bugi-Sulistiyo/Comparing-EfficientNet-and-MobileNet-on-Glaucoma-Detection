@@ -99,6 +99,21 @@ def string_upper(val):
         str/int: the value that has been changed
     """
     if type(val) == str:
-        return val.replace('_', ' ').title()
+        if val == 'auc':
+            return val.upper()
+        else:
+            return val.replace('_', ' ').title()
     else:
         return round(val, 4)
+
+def content(path:str):
+    """getting the content for filling the dashboard
+
+    Args:
+        path (str): the path of the txt file
+
+    Returns:
+        str: the content of the txt file
+    """
+    file = open(f'{path}.txt', 'r')
+    return file.read()
