@@ -218,7 +218,7 @@ def train_model(pre_trained:str,
 
     # create the model structure
     model = model_base(model_name=pre_trained,
-                            path_model_src=model_src)
+                        path_model_src=model_src)
     # configure the model
     model.compile(optimizer=optimizer,
                     loss=loss_funct,
@@ -232,7 +232,7 @@ def train_model(pre_trained:str,
     
     # save the model
     model.save(os.path.join(model_dest,
-                                f'{model_name}.h5'))
+                            f'{model_name}.h5'))
     
     print(f'{dataset} {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
     return result
