@@ -217,21 +217,21 @@ def train_model(pre_trained:str,
     epoch = 15
 
     # create the model structure
-    tl_mnet_v2 = model_base(model_name=pre_trained,
+    model = model_base(model_name=pre_trained,
                             path_model_src=model_src)
     # configure the model
-    tl_mnet_v2.compile(optimizer=optimizer,
+    model.compile(optimizer=optimizer,
                     loss=loss_funct,
                     metrics=metrices)
     
     # train the model
-    result = tl_mnet_v2.fit(datagen_train,
+    result = model.fit(datagen_train,
                 validation_data=datagen_val,
                 epochs=epoch,
                 verbose=0)
     
     # save the model
-    tl_mnet_v2.save(os.path.join(model_dest,
+    model.save(os.path.join(model_dest,
                                 f'{model_name}.h5'))
     
     print(f'{dataset} {fold} finished in {round(time.perf_counter() - start_time, 2)} seconds')
