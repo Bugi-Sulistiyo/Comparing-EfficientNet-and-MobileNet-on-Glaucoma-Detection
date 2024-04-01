@@ -431,6 +431,8 @@ def confusion_matrix_plot_highest(result:pd.DataFrame,
                             f'confusion_matrix_{file_name}.png'),
                 dpi=300,
                 format='png',
+                bbox_inches='tight',
+                transparent=True,
                 metadata={
                         'Title': f'confusion_matrix_{model_name}',
                         'Author': 'Bugi Sulistiyo',
