@@ -17,11 +17,18 @@ The dataset used for building the model is fundus image. There are 4 fundus imag
     This dataset were taken at General Universitario Reino Sofia Hospital in Murcia, Spain between 2018-2020. It consist of 488 fundus images labeled as glaucoma, suspicious, and normal.
 
 ### 2. Preparation and EDA
-
+Before all the dataset being augmented in preprocessing step, it need to be restructurize. The dataset should be restructurize because some of it have a different structure file and some of it does not devided by folder for each label. In order to do the restructurization of the file structure, the dataset must be explored and the metadata is understood. Also, data splitting process is being done in this step.
 ### 3. Preprocessing
+The preprocessing methoed used is augmentation. The augmentation used are horizontal & vertical flipping, brightness, and CLAHE.
 ### 4. Training Model
+There are 6 model trained using 4 dataset. I used 3 newest model from EfficientNet and MobileNet architecture each. all model is trained on every dataset and scenario defined.
 ### 5. Testing Model
+After training model is completed, the model is immidiatly saved in .h5 format. After that, the testing script load each model and test it on every scenario.
 ### 6. Dashboard Development
+To make the result easier to compared, I make a dashboard to show the final result.
 
-## Dataset
-On this project, I use 4 fundus images dataset. This is the dataset I used:
+## File Structure
+- `data\` --> (hidden) store train result, model, and all important information
+- `dataset\` --> (hidden) hide because have a large size. store source dataset, prepared dataset, and augmented dataset
+- `lampiran\` --> store all file from data\ that will be attached on skripsi
+- `main\scripts\` --> store all the script used in this project
